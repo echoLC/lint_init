@@ -72,18 +72,8 @@ fn main() {
             write_content(&content, String::from(target_url_prefix) + &target_url);
         },
         Err(_err) => {
-            let target_dir_path = current_dir().unwrap();
-            let current_dir_s = match target_dir_path.to_str() {
-                Some(path_str) => path_str,
-                None => panic!("Unable get current dir")
-            };
-            let target_dir_path = current_dir_s.to_string() + "/" + &dir;
-            let target_dir_path = RelativePath::new(&target_dir_path).normalize();
+            let target_path =  get_target_dir(&dir);
 
-            println!("target dir is : {:?}", &target_dir_path);
-
-            let target_path =  target_dir_path.to_path("/");
-            
             fs::create_dir(&target_path).expect("Unable to create dir");
 
             let target_url_prefix = match target_path.to_str() {
@@ -107,4 +97,18 @@ fn write_content(content: &str, target_path: String) {
         Ok(_) => println!("write {} config successfully", &target_path),
         Err(err) => panic!("write file failed: {:?}", err)
     }
+}
+
+fn get_target_dir (dir: &str) -> PathBuf {
+    let target_dir_path = current_dir().unwrap();
+    let current_dir_s = match target_dir_path.to_str() {
+        Some(path_str) => path_str,
+        None => panic!("Unable get current dir")
+    };
+    let target_dir_path = current_dir_s.to_string() + "/" + dir;
+    let target_dir_path = RelativePath::new(&target_dir_path).normalize();
+
+    println!("target dir is : {:?}", &target_dir_path);
+    
+    target_dir_path.to_path("/")
 }

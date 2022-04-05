@@ -4,4 +4,14 @@ A cli for init lint config that wrote by rust.
 ## TODO
 - [x] parse args
 
-- [ ] add a variety of templates
+- [x] add a variety of templates
+
+- [ ] auto create dir and file
+
+- [ ] auto run npm/yarn install
+
+- [ ] interact with select template
+
+- [ ] unit test
+
+- [ ] support web assembly

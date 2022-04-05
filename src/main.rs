@@ -1,8 +1,10 @@
 use ansi_term::Colour::{Red, Green};
 use clap::Parser;
 use std::fs;
+use std::io;
 use std::env::current_dir;
 use std::path::{PathBuf};
+use relative_path::RelativePath;
 
 #[derive(Parser, Debug)]
 #[clap(name="lint-init", author="echoLC", version = "0.1.0", about = "Init lint config for a project.", long_about=None)]
@@ -51,31 +53,58 @@ fn main() {
     let target_url = file_info.target_url;
     
 
-    let content = fs::read_to_string(template_url).expect("Unable to read file");
+    let content = read_template_content(template_url).expect("Unable to read file");
 
     println!("template content is: {}", Green.paint(&content));
 
-    let target_dir = PathBuf::from(dir);
+    let target_dir = PathBuf::from(&dir);
     let target_dir = fs::canonicalize(&target_dir);
 
-    match target_dir {
-        Ok(mut path) => {
+    match &target_dir {
+        Ok(path) => {
             print!("write file content");
 
-            path.push(&target_url);
+            let target_url_prefix = match path.to_str() {
+                Some(path_str) => path_str,
+                None => panic!("Unable get current target path")
+            };
 
-            let res = fs::write(path,&content);
-            
-            match res {
-                Ok(_) => println!("write {} config successfully", &target_url),
-                Err(err) => panic!("write file failed: {:?}", err)
-            }
+            write_content(&content, String::from(target_url_prefix) + &target_url);
         },
-        Err(err) => {
-            print!("dir is not exist: {}", err.to_string());
+        Err(_err) => {
+            let target_dir_path = current_dir().unwrap();
+            let current_dir_s = match target_dir_path.to_str() {
+                Some(path_str) => path_str,
+                None => panic!("Unable get current dir")
+            };
+            let target_dir_path = current_dir_s.to_string() + "/" + &dir;
+            let target_dir_path = RelativePath::new(&target_dir_path).normalize();
 
-            fs::create_dir(&target_url).expect("Unable to create dir");
-            print!("write file content");
+            println!("target dir is : {:?}", &target_dir_path);
+
+            let target_path =  target_dir_path.to_path("/");
+            
+            fs::create_dir(&target_path).expect("Unable to create dir");
+
+            let target_url_prefix = match target_path.to_str() {
+                Some(path_str) => path_str,
+                None => panic!("Unable get current dir")
+            };
+
+            write_content(&content, String::from(target_url_prefix) + &target_url);
         }
     };
+}
+
+fn read_template_content (path: String) -> Result<String, io::Error> {
+    fs::read_to_string(path)
+}
+
+fn write_content(content: &str, target_path: String) {
+    let res = fs::write(&target_path,content);
+            
+    match res {
+        Ok(_) => println!("write {} config successfully", &target_path),
+        Err(err) => panic!("write file failed: {:?}", err)
+    }
 }

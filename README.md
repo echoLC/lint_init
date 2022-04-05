@@ -2,6 +2,6 @@
 A cli for init lint config that wrote by rust.
 
 ## TODO
-- [ ] parse args
+- [x] parse args
 
 - [ ] add a variety of templates

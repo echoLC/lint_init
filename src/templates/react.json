@@ -1,0 +1,4 @@
+{
+  "extends": "plugin:@sl/eslint-plugin-fe/react"
+}
+

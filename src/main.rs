@@ -5,7 +5,7 @@ use std::env::current_dir;
 use std::path::{PathBuf};
 
 #[derive(Parser, Debug)]
-#[clap(name="lint_init", author="echoLC", version = "0.0.1", about = "init lint config for a project", long_about=None)]
+#[clap(name="lint-init", author="echoLC", version = "0.0.1", about = "init lint config for a project", long_about=None)]
 struct Cli {
     #[clap(short, long)]
     template: String,

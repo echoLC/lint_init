@@ -22,7 +22,7 @@ OPTIONS:
 
 - [x] add a variety of templates
 
-- [ ] auto create dir and file
+- [x] auto create dir and file
 
 - [ ] auto run npm/yarn install
 

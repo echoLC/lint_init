@@ -2,8 +2,10 @@
 name = "lint-init"
 version = "0.2.0"
 edition = "2021"
-description="A cli for init lint config that wrote by rust"
+description="A cli for init lint config that wrote by rust."
 license = "MIT"
+repository = "https://github.com/echoLC/lint_init"
+keywords = ["cli", "eslint"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

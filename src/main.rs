@@ -5,11 +5,10 @@ use execute::Execute;
 use ansi_term::Colour::{Red, Green};
 use clap::{Parser};
 use std::fs;
-use std::io;
 use std::env::{current_dir};
 use std::path::{PathBuf};
 use relative_path::RelativePath;
-
+use lint_init::template::{*};
 
 #[derive(Parser, Debug)]
 #[clap(name="lint-init", author="echoLC", version = "0.1.0", about = "Init lint config for a project.", long_about=None)]
@@ -26,8 +25,8 @@ struct Cli {
 
 const ESLINT_FILE_NAME: &str = "/.eslintrc.json";
 
-struct FileInfo {
-    template_url: String,
+struct TemplateInfo {
+    template_content: String,
     target_url: String
 }
 
@@ -35,17 +34,14 @@ fn main() {
     let args = Cli::parse();
     let dir = args.dir;
 
-    let file_info: FileInfo = get_template(args.template);
+    println!("template content: {}", prettier::TEMPLATE_CONTENT);
 
-    let template_url = String::from("templates") + &file_info.template_url;
+    let file_info: TemplateInfo = get_template_content(args.template);
+
+    let template_content = file_info.template_content;
     let target_url = file_info.target_url;
     
-
-    println!("template_url: {}", &template_url);
-
-    let content = read_template_content(template_url).expect("Unable to read file");
-
-    println!("template content is: {}", Green.paint(&content));
+    println!("template content is: {}", Green.paint(&template_content));
 
     let target_dir = PathBuf::from(&dir);
     let target_dir = fs::canonicalize(&target_dir);
@@ -54,7 +50,7 @@ fn main() {
         Ok(path) => {
             print!("write file content");
 
-            write_content(&content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
+            write_content(&template_content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
 
             if args.auto_install {
                 execute_install();
@@ -65,7 +61,7 @@ fn main() {
 
             fs::create_dir(&target_path).expect("Unable to create dir");
 
-            write_content(&content, get_str_from_pathbuf(target_path) + &target_url);
+            write_content(&template_content, get_str_from_pathbuf(target_path) + &target_url);
 
             if args.auto_install {
                 execute_install();
@@ -74,18 +70,14 @@ fn main() {
     };
 }
 
-fn get_template (template: String) -> FileInfo {
+fn get_template_content (template: String) -> TemplateInfo {
     match template.as_str() {
-        "typescript" => FileInfo{template_url: String::from("/typescript.json"), target_url: String::from(ESLINT_FILE_NAME) },
-        "reactTs" => FileInfo{template_url: String::from("/react.json"), target_url: String::from(ESLINT_FILE_NAME) },
-        "prettier" => FileInfo{template_url: String::from("/prettier.js"), target_url: String::from("/.prettierrc.js") },
-        "pureJs" => FileInfo{template_url: String::from("/pure-js.json"), target_url: String::from(ESLINT_FILE_NAME) },
+        "typescript" => TemplateInfo{template_content: String::from(typescript::TEMPLATE_CONTENT), target_url: String::from(ESLINT_FILE_NAME) },
+        "reactTs" => TemplateInfo{template_content: String::from(react::TEMPLATE_CONTENT), target_url: String::from(ESLINT_FILE_NAME) },
+        "prettier" => TemplateInfo{template_content: String::from(prettier::TEMPLATE_CONTENT), target_url: String::from("/.prettierrc.js") },
+        "pureJs" => TemplateInfo{template_content: String::from(pure_js::TEMPLATE_CONTENT), target_url: String::from(ESLINT_FILE_NAME) },
         _ => panic!("unknown template type: {}", Red.paint(template))
     }
-}
-
-fn read_template_content (path: String) -> Result<String, io::Error> {
-    fs::read_to_string(path)
 }
 
 fn write_content(content: &str, target_path: String) {

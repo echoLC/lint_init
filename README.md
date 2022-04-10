@@ -62,6 +62,10 @@ OPTIONS:
 
 - [ ] interact with select template
 
+- [ ] add ci workflow
+
 - [ ] unit test
+
+- [ ] refactoring
 
 - [ ] support web assembly

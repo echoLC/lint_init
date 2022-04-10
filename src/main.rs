@@ -1,10 +1,15 @@
+extern crate execute;
+use std::process::Command;
+use execute::Execute;
+
 use ansi_term::Colour::{Red, Green};
-use clap::Parser;
+use clap::{Parser};
 use std::fs;
 use std::io;
 use std::env::current_dir;
 use std::path::{PathBuf};
 use relative_path::RelativePath;
+
 
 #[derive(Parser, Debug)]
 #[clap(name="lint-init", author="echoLC", version = "0.1.0", about = "Init lint config for a project.", long_about=None)]
@@ -14,6 +19,9 @@ struct Cli {
 
     #[clap(short, long, default_value = ".")]
     dir: String,
+
+    #[clap(short, long)]
+    auto_install: bool,
 }
 
 const ESLINT_FILE_NAME: &str = "/.eslintrc.json";
@@ -39,6 +47,7 @@ fn main() {
     let target_url = file_info.target_url;
     
 
+    println!("template_url: {}", &template_url);
     let content = read_template_content(template_url).expect("Unable to read file");
 
     println!("template content is: {}", Green.paint(&content));
@@ -51,6 +60,10 @@ fn main() {
             print!("write file content");
 
             write_content(&content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
+
+            if args.auto_install {
+                execute_install();
+            }
         },
         Err(_err) => {
             let target_path =  get_target_dir(&dir);
@@ -58,6 +71,10 @@ fn main() {
             fs::create_dir(&target_path).expect("Unable to create dir");
 
             write_content(&content, get_str_from_pathbuf(target_path) + &target_url);
+
+            if args.auto_install {
+                execute_install();
+            }
         }
     };
 }
@@ -100,4 +117,25 @@ fn get_str_from_pathbuf (path: PathBuf) -> String {
         Some(path_str) => path_str.to_string(),
         None => panic!("Unable get string from pathbuf")
     }
+}
+
+fn execute_install () {
+    let mut install_command = Command::new("yarn");
+    
+    install_command.arg("add");
+    install_command.arg("eslint");
+    install_command.arg("@sl/eslint-plugin-fe");
+    install_command.arg("--dev");
+    install_command.arg("--registry=https://npm-registry.duowan.com");
+         
+    let res = install_command.execute();
+
+    match res {
+        Err(err) => {
+            println!("execute install command error: {}", err.to_string());
+        },
+        _ => {
+            println!("install dep successfully");
+        }
+    }    
 }

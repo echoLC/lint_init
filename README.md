@@ -30,7 +30,7 @@ lint-init --template typescript --dir ../react-app
 lint-init --template typescript --dir . --auto-install
 ```
 
-**Tips: `--auto-install` only work when dir value is `.` **.
+**Tips: `--auto-install` only work when dir value is `.`**.
 
 ## Features
 

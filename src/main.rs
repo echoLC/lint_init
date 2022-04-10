@@ -34,8 +34,6 @@ fn main() {
     let args = Cli::parse();
     let dir = args.dir;
 
-    println!("template content: {}", prettier::TEMPLATE_CONTENT);
-
     let file_info: TemplateInfo = get_template_content(args.template);
 
     let template_content = file_info.template_content;

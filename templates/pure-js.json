@@ -1,3 +1,0 @@
-{
-  "extends": "plugin:@sl/eslint-plugin-fe/pure-js"
-}

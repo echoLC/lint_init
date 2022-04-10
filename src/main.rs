@@ -25,31 +25,17 @@ struct FileInfo {
 
 fn main() {
     let args = Cli::parse();
-    let template = args.template;
     let dir = args.dir;
 
-    let file_info: FileInfo = match template.as_str() {
-        "typescript" => FileInfo{template_url: String::from("/typescript.json"), target_url: String::from(ESLINT_FILE_NAME) },
-        "reactTs" => FileInfo{template_url: String::from("/react.json"), target_url: String::from(ESLINT_FILE_NAME) },
-        "prettier" => FileInfo{template_url: String::from("/prettier.js"), target_url: String::from("/.prettierrc.js") },
-        "pureJs" => FileInfo{template_url: String::from("/pure-js.json"), target_url: String::from(ESLINT_FILE_NAME) },
-        _ => panic!("unknown template type: {}", Red.paint(template))
-    };
+    let file_info: FileInfo = get_template(args.template);
 
-    let current_dir_s = if let Ok(path) = current_dir() {
+    let current_dir_path = if let Ok(path) = current_dir() {
         path
     } else {
         panic!("Unable get current dir");
     };
 
-    let current_dir_s = match current_dir_s.to_str() {
-        Some(path_str) => path_str,
-        None => panic!("Unable get current dir")
-    };
-
-    println!("template url: {:?}",  String::from(current_dir_s) + "/src/templates" + &file_info.template_url);
-
-    let template_url = String::from(current_dir_s) + "/src/templates" + &file_info.template_url;
+    let template_url = get_str_from_pathbuf(current_dir_path) + "/src/templates" + &file_info.template_url;
     let target_url = file_info.target_url;
     
 
@@ -64,26 +50,26 @@ fn main() {
         Ok(path) => {
             print!("write file content");
 
-            let target_url_prefix = match path.to_str() {
-                Some(path_str) => path_str,
-                None => panic!("Unable get current target path")
-            };
-
-            write_content(&content, String::from(target_url_prefix) + &target_url);
+            write_content(&content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
         },
         Err(_err) => {
             let target_path =  get_target_dir(&dir);
 
             fs::create_dir(&target_path).expect("Unable to create dir");
 
-            let target_url_prefix = match target_path.to_str() {
-                Some(path_str) => path_str,
-                None => panic!("Unable get current dir")
-            };
-
-            write_content(&content, String::from(target_url_prefix) + &target_url);
+            write_content(&content, get_str_from_pathbuf(target_path) + &target_url);
         }
     };
+}
+
+fn get_template (template: String) -> FileInfo {
+    match template.as_str() {
+        "typescript" => FileInfo{template_url: String::from("/typescript.json"), target_url: String::from(ESLINT_FILE_NAME) },
+        "reactTs" => FileInfo{template_url: String::from("/react.json"), target_url: String::from(ESLINT_FILE_NAME) },
+        "prettier" => FileInfo{template_url: String::from("/prettier.js"), target_url: String::from("/.prettierrc.js") },
+        "pureJs" => FileInfo{template_url: String::from("/pure-js.json"), target_url: String::from(ESLINT_FILE_NAME) },
+        _ => panic!("unknown template type: {}", Red.paint(template))
+    }
 }
 
 fn read_template_content (path: String) -> Result<String, io::Error> {
@@ -100,15 +86,18 @@ fn write_content(content: &str, target_path: String) {
 }
 
 fn get_target_dir (dir: &str) -> PathBuf {
-    let target_dir_path = current_dir().unwrap();
-    let current_dir_s = match target_dir_path.to_str() {
-        Some(path_str) => path_str,
-        None => panic!("Unable get current dir")
-    };
-    let target_dir_path = current_dir_s.to_string() + "/" + dir;
+    let current_dir_s = get_str_from_pathbuf(current_dir().unwrap());
+    let target_dir_path = current_dir_s + "/" + dir;
     let target_dir_path = RelativePath::new(&target_dir_path).normalize();
 
     println!("target dir is : {:?}", &target_dir_path);
     
     target_dir_path.to_path("/")
+}
+
+fn get_str_from_pathbuf (path: PathBuf) -> String {
+    match path.to_str() {
+        Some(path_str) => path_str.to_string(),
+        None => panic!("Unable get string from pathbuf")
+    }
 }

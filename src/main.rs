@@ -6,7 +6,7 @@ use ansi_term::Colour::{Red, Green};
 use clap::{Parser};
 use std::fs;
 use std::io;
-use std::env::current_dir;
+use std::env::{current_dir};
 use std::path::{PathBuf};
 use relative_path::RelativePath;
 
@@ -37,17 +37,12 @@ fn main() {
 
     let file_info: FileInfo = get_template(args.template);
 
-    let current_dir_path = if let Ok(path) = current_dir() {
-        path
-    } else {
-        panic!("Unable get current dir");
-    };
-
-    let template_url = get_str_from_pathbuf(current_dir_path) + "/src/templates" + &file_info.template_url;
+    let template_url = String::from("templates") + &file_info.template_url;
     let target_url = file_info.target_url;
     
 
     println!("template_url: {}", &template_url);
+
     let content = read_template_content(template_url).expect("Unable to read file");
 
     println!("template content is: {}", Green.paint(&content));

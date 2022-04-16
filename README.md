@@ -60,7 +60,7 @@ OPTIONS:
 
 - [x] auto run npm/yarn install
 
-- [ ] interact with select template
+- [x] interact with select template
 
 - [ ] add ci workflow
 

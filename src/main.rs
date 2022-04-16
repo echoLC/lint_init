@@ -4,10 +4,14 @@ use execute::Execute;
 
 use ansi_term::Colour::{Red, Green};
 use clap::{Parser};
-use std::fs;
+use std::{fs};
 use std::env::{current_dir};
 use std::path::{PathBuf};
 use relative_path::RelativePath;
+use dialoguer::{
+    MultiSelect,
+    theme::ColorfulTheme
+};
 use lint_init::template::{*};
 
 #[derive(Parser, Debug)]
@@ -24,6 +28,7 @@ struct Cli {
 }
 
 const ESLINT_FILE_NAME: &str = "/.eslintrc.json";
+const TEMPLATE_LIST: [&str;5] = ["default", "typescript", "prettier", "pure_js", "react"];
 
 struct TemplateInfo {
     template_content: String,
@@ -31,41 +36,51 @@ struct TemplateInfo {
 }
 
 fn main() {
+    
+    let template_list = prompt_select_template();
+    let template_list = normalize_template_list(template_list);
+
+    println!("current select templates: {:?}", template_list);
+
     let args = Cli::parse();
     let dir = args.dir;
 
-    let file_info: TemplateInfo = get_template_content(args.template);
 
-    let template_content = file_info.template_content;
-    let target_url = file_info.target_url;
-    
-    println!("template content is: {}", Green.paint(&template_content));
+    for i in template_list {
+        let template = TEMPLATE_LIST[i];
+        let file_info = get_template_content(template.to_string());
 
-    let target_dir = PathBuf::from(&dir);
-    let target_dir = fs::canonicalize(&target_dir);
+        let template_content = file_info.template_content;
+        let target_url = file_info.target_url;
+        
+        println!("template content is: {}", Green.paint(&template_content));
 
-    match &target_dir {
-        Ok(path) => {
-            print!("write file content");
+        let target_dir = PathBuf::from(&dir);
+        let target_dir = fs::canonicalize(&target_dir);
 
-            write_content(&template_content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
+        match &target_dir {
+            Ok(path) => {
+                print!("write file content");
 
-            if args.auto_install {
-                execute_install();
+                write_content(&template_content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
+
+                if args.auto_install {
+                    execute_install();
+                }
+            },
+            Err(_err) => {
+                let target_path =  get_target_dir(&dir);
+
+                fs::create_dir(&target_path).expect("Unable to create dir");
+
+                write_content(&template_content, get_str_from_pathbuf(target_path) + &target_url);
+
+                if args.auto_install {
+                    execute_install();
+                }
             }
-        },
-        Err(_err) => {
-            let target_path =  get_target_dir(&dir);
-
-            fs::create_dir(&target_path).expect("Unable to create dir");
-
-            write_content(&template_content, get_str_from_pathbuf(target_path) + &target_url);
-
-            if args.auto_install {
-                execute_install();
-            }
-        }
-    };
+        };
+    }
 }
 
 fn get_template_content (template: String) -> TemplateInfo {
@@ -123,4 +138,32 @@ fn execute_install () {
             println!("install dep successfully");
         }
     }    
+}
+
+fn prompt_select_template () -> Vec<usize> {
+    let defaults = vec![true, false, false, false, false];
+    let selection = MultiSelect::with_theme(&ColorfulTheme::default())
+        .items(&TEMPLATE_LIST)
+        .defaults(&defaults)
+        .interact();
+
+    match selection {
+        Ok(select_templates) => select_templates,
+        Err(err) => {
+            println!("select typescript error: {}", err.to_string());
+            [0].to_vec()
+        }
+    }
+}
+
+fn normalize_template_list (template_list: Vec<usize>) -> Vec<usize> {
+    let result;
+    if template_list.len() == 1 && template_list[0] == 0 {
+        result = vec![1, 2];
+    } else if template_list.contains(&0) {
+        result = template_list.into_iter().filter(|index| index != &0).collect();
+    } else {
+        result = template_list.clone();
+    }
+    result
 }

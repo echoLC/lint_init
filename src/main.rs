@@ -167,3 +167,68 @@ fn normalize_template_list (template_list: Vec<usize>) -> Vec<usize> {
     }
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_typescript_template () {
+        let template_info = get_template_content(String::from("typescript"));
+        assert_eq!(template_info.template_content, String::from(typescript::TEMPLATE_CONTENT));
+        assert_eq!(template_info.target_url, String::from(ESLINT_FILE_NAME));
+    }
+
+    #[test]
+    fn get_react_template () {
+        let template_info = get_template_content(String::from("reactTs"));
+        assert_eq!(template_info.template_content, String::from(react::TEMPLATE_CONTENT));
+        assert_eq!(template_info.target_url, String::from(ESLINT_FILE_NAME));
+    }
+
+    #[test]
+    fn get_pure_js_template () {
+        let template_info = get_template_content(String::from("pureJs"));
+        assert_eq!(template_info.template_content, String::from(pure_js::TEMPLATE_CONTENT));
+        assert_eq!(template_info.target_url, String::from(ESLINT_FILE_NAME));
+    }
+
+    #[test]
+    fn get_prettier_template () {
+        let template_info = get_template_content(String::from("prettier"));
+        assert_eq!(template_info.template_content, String::from(prettier::TEMPLATE_CONTENT));
+        assert_eq!(template_info.target_url, String::from("/.prettierrc.js"));
+    }
+
+    #[test]
+    fn get_target_dir_from_current_dir () {
+        let current_dir = get_target_dir(".");
+        assert_eq!(&current_dir.to_string_lossy()[1..], String::from("/Users/luochao/echoLC-github/lint_init"));
+    }
+
+    #[test]
+    fn get_target_dir_from_relative_dir () {
+        let current_dir = get_target_dir("../react-app");
+        assert_eq!(&current_dir.to_string_lossy()[1..], String::from("/Users/luochao/echoLC-github/react-app"));
+    }
+
+    #[test]
+    fn convert_pathbuf_to_string () {
+        assert_eq!(get_str_from_pathbuf(PathBuf::from("/react-app")), String::from("/react-app"));
+    }
+
+    #[test]
+    fn normalize_default_template_list () {
+        assert_eq!(normalize_template_list(Vec::from([0])), Vec::from([1, 2]));
+    }
+
+    #[test]
+    fn normalize_normal_template_list () {
+        assert_eq!(normalize_template_list(Vec::from([1, 2])), Vec::from([1, 2]));
+    }
+
+    #[test]
+    fn normalize_normal_and_default_template_list () {
+        assert_eq!(normalize_template_list(Vec::from([0, 1, 2])), Vec::from([1, 2]));
+    }
+}

@@ -202,14 +202,17 @@ mod tests {
 
     #[test]
     fn get_target_dir_from_current_dir () {
-        let current_dir = get_target_dir(".");
-        assert_eq!(&current_dir.to_string_lossy()[1..], String::from("/Users/luochao/echoLC-github/lint_init"));
+        let target_dir = get_target_dir(".");
+        let current_dir = get_str_from_pathbuf(current_dir().unwrap());
+        assert_eq!(&target_dir.to_string_lossy()[1..], current_dir);
     }
 
     #[test]
     fn get_target_dir_from_relative_dir () {
-        let current_dir = get_target_dir("../react-app");
-        assert_eq!(&current_dir.to_string_lossy()[1..], String::from("/Users/luochao/echoLC-github/react-app"));
+        let target_dir = get_target_dir("../react-app");
+        let current_dir = get_str_from_pathbuf(current_dir().unwrap());
+        let right_dir = current_dir + "/" + "../react-app";
+        assert_eq!(target_dir.to_string_lossy(), RelativePath::new(&right_dir).normalize().to_path("/").to_string_lossy());
     }
 
     #[test]

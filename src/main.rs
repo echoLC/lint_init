@@ -132,7 +132,7 @@ fn execute_install () {
 
     match res {
         Err(err) => {
-            println!("execute install command error: {}", err.to_string());
+            println!("execute install command error: {}", err);
         },
         _ => {
             println!("install dep successfully");
@@ -150,7 +150,7 @@ fn prompt_select_template () -> Vec<usize> {
     match selection {
         Ok(select_templates) => select_templates,
         Err(err) => {
-            println!("select typescript error: {}", err.to_string());
+            println!("select typescript error: {}", err);
             [0].to_vec()
         }
     }
@@ -163,7 +163,7 @@ fn normalize_template_list (template_list: Vec<usize>) -> Vec<usize> {
     } else if template_list.contains(&0) {
         result = template_list.into_iter().filter(|index| index != &0).collect();
     } else {
-        result = template_list.clone();
+        result = template_list;
     }
     result
 }

@@ -62,7 +62,7 @@ OPTIONS:
 
 - [x] interact with select template
 
-- [ ] add ci workflow
+- [x] add ci workflow
 
 - [x] unit test
 

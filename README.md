@@ -64,7 +64,7 @@ OPTIONS:
 
 - [ ] add ci workflow
 
-- [ ] unit test
+- [x] unit test
 
 - [ ] refactoring
 

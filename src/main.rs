@@ -27,12 +27,12 @@ struct Cli {
     auto_install: bool,
 }
 
-const ESLINT_FILE_NAME: &str = "/.eslintrc.json";
+const ESLINT_FILE_NAME: &str = ".eslintrc.json";
 const TEMPLATE_LIST: [&str;5] = ["default", "typescript", "prettier", "pure_js", "react"];
 
-struct TemplateInfo {
-    template_content: String,
-    target_url: String
+struct Template {
+    content: String,
+    filename: String
 }
 
 fn main() {
@@ -50,8 +50,8 @@ fn main() {
         let template = TEMPLATE_LIST[i];
         let file_info = get_template_content(template.to_string());
 
-        let template_content = file_info.template_content;
-        let target_url = file_info.target_url;
+        let template_content = file_info.content;
+        let target_url = file_info.filename;
         
         println!("template content is: {}", Green.paint(&template_content));
 
@@ -62,7 +62,7 @@ fn main() {
             Ok(path) => {
                 print!("write file content");
 
-                write_content(&template_content, get_str_from_pathbuf(path.to_path_buf()) + &target_url);
+                write_content(&template_content, get_str_from_pathbuf(path.to_path_buf()) + "/" + &target_url);
 
                 if args.auto_install {
                     execute_install();
@@ -73,7 +73,7 @@ fn main() {
 
                 fs::create_dir(&target_path).expect("Unable to create dir");
 
-                write_content(&template_content, get_str_from_pathbuf(target_path) + &target_url);
+                write_content(&template_content, get_str_from_pathbuf(target_path) + "/"  + &target_url);
 
                 if args.auto_install {
                     execute_install();
@@ -83,12 +83,12 @@ fn main() {
     }
 }
 
-fn get_template_content (template: String) -> TemplateInfo {
+fn get_template_content (template: String) -> Template{
     match template.as_str() {
-        "typescript" => TemplateInfo{template_content: String::from(typescript::TEMPLATE_CONTENT), target_url: String::from(ESLINT_FILE_NAME) },
-        "reactTs" => TemplateInfo{template_content: String::from(react::TEMPLATE_CONTENT), target_url: String::from(ESLINT_FILE_NAME) },
-        "prettier" => TemplateInfo{template_content: String::from(prettier::TEMPLATE_CONTENT), target_url: String::from("/.prettierrc.js") },
-        "pureJs" => TemplateInfo{template_content: String::from(pure_js::TEMPLATE_CONTENT), target_url: String::from(ESLINT_FILE_NAME) },
+        "typescript" => Template{content: String::from(typescript::TEMPLATE_CONTENT), filename: String::from(ESLINT_FILE_NAME) },
+        "reactTs" => Template{content: String::from(react::TEMPLATE_CONTENT), filename: String::from(ESLINT_FILE_NAME) },
+        "prettier" => Template{content: String::from(prettier::TEMPLATE_CONTENT), filename: String::from(".prettierrc.js") },
+        "pureJs" => Template{content: String::from(pure_js::TEMPLATE_CONTENT), filename: String::from(ESLINT_FILE_NAME) },
         _ => panic!("unknown template type: {}", Red.paint(template))
     }
 }
@@ -175,29 +175,29 @@ mod tests {
     #[test]
     fn get_typescript_template () {
         let template_info = get_template_content(String::from("typescript"));
-        assert_eq!(template_info.template_content, String::from(typescript::TEMPLATE_CONTENT));
-        assert_eq!(template_info.target_url, String::from(ESLINT_FILE_NAME));
+        assert_eq!(template_info.content, String::from(typescript::TEMPLATE_CONTENT));
+        assert_eq!(template_info.filename, String::from(ESLINT_FILE_NAME));
     }
 
     #[test]
     fn get_react_template () {
         let template_info = get_template_content(String::from("reactTs"));
-        assert_eq!(template_info.template_content, String::from(react::TEMPLATE_CONTENT));
-        assert_eq!(template_info.target_url, String::from(ESLINT_FILE_NAME));
+        assert_eq!(template_info.content, String::from(react::TEMPLATE_CONTENT));
+        assert_eq!(template_info.filename, String::from(ESLINT_FILE_NAME));
     }
 
     #[test]
     fn get_pure_js_template () {
         let template_info = get_template_content(String::from("pureJs"));
-        assert_eq!(template_info.template_content, String::from(pure_js::TEMPLATE_CONTENT));
-        assert_eq!(template_info.target_url, String::from(ESLINT_FILE_NAME));
+        assert_eq!(template_info.content, String::from(pure_js::TEMPLATE_CONTENT));
+        assert_eq!(template_info.filename, String::from(ESLINT_FILE_NAME));
     }
 
     #[test]
     fn get_prettier_template () {
         let template_info = get_template_content(String::from("prettier"));
-        assert_eq!(template_info.template_content, String::from(prettier::TEMPLATE_CONTENT));
-        assert_eq!(template_info.target_url, String::from("/.prettierrc.js"));
+        assert_eq!(template_info.content, String::from(prettier::TEMPLATE_CONTENT));
+        assert_eq!(template_info.filename, String::from(".prettierrc.js"));
     }
 
     #[test]

@@ -66,6 +66,6 @@ OPTIONS:
 
 - [x] unit test
 
-- [ ] refactoring
+- [x] refactoring
 
 - [ ] support web assembly

@@ -28,7 +28,8 @@ struct Cli {
 }
 
 const ESLINT_FILE_NAME: &str = ".eslintrc.json";
-const TEMPLATE_LIST: [&str;5] = ["default", "typescript", "prettier", "pure_js", "react"];
+const PRETTIER_FILE_NAME: &str = ".prettierrc.js";
+const TEMPLATE_LIST: [&str;5] = ["default", "typescript", "prettier", "pureJs", "reactTs"];
 
 struct Template {
     content: String,
@@ -87,7 +88,7 @@ fn get_template_content (template: String) -> Template{
     match template.as_str() {
         "typescript" => Template{content: String::from(typescript::TEMPLATE_CONTENT), filename: String::from(ESLINT_FILE_NAME) },
         "reactTs" => Template{content: String::from(react::TEMPLATE_CONTENT), filename: String::from(ESLINT_FILE_NAME) },
-        "prettier" => Template{content: String::from(prettier::TEMPLATE_CONTENT), filename: String::from(".prettierrc.js") },
+        "prettier" => Template{content: String::from(prettier::TEMPLATE_CONTENT), filename: String::from(PRETTIER_FILE_NAME) },
         "pureJs" => Template{content: String::from(pure_js::TEMPLATE_CONTENT), filename: String::from(ESLINT_FILE_NAME) },
         _ => panic!("unknown template type: {}", Red.paint(template))
     }
